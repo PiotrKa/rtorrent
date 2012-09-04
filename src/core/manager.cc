@@ -85,7 +85,8 @@ Manager::push_log(const char* msg) {
 Manager::Manager() :
   m_hashingView(NULL),
   m_log_important(torrent::log_open_log_buffer("important")),
-  m_log_complete(torrent::log_open_log_buffer("complete"))
+  m_log_complete(torrent::log_open_log_buffer("complete")),
+  m_ipFilter(NULL)
 {
   m_downloadStore   = new DownloadStore();
   m_downloadList    = new DownloadList();
@@ -107,6 +108,8 @@ Manager::~Manager() {
   delete m_downloadStore;
   delete m_httpQueue;
   delete m_fileStatusCache;
+
+  set_ip_filter(NULL);
 }
 
 void
@@ -150,6 +153,26 @@ Manager::initialize_second() {
   m_httpQueue->slot_factory(sigc::mem_fun(m_httpStack, &CurlStack::new_object));
 
   CurlStack::global_init();
+
+  torrent::connection_manager()->set_filter(sigc::mem_fun(this, &Manager::filter_ip));
+}
+
+uint32_t
+Manager::filter_ip(const sockaddr* sa) {
+  IpRange* r = NULL;
+  // if something's wrong with filter or address it's gonna be allowed
+  if( m_ipFilter && sa ) {
+    const rak::socket_address* socketAddress = rak::socket_address::cast_from(sa);
+    if( socketAddress->is_valid() && (socketAddress->family() == rak::socket_address::af_inet) )
+      r = m_ipFilter->find_range( socketAddress->sa_inet()->address_h() );
+    if( r ) {
+      lt_log_print(torrent::LOG_CONNECTION_NOTICE, ("IP filter rejected " + socketAddress->address_str() + " because of '" + r->to_string() + "'").c_str());
+    }
+    else {
+      lt_log_print(torrent::LOG_CONNECTION_INFO, ("IP filter allowed connection with " + socketAddress->address_str()).c_str());
+    }
+  }
+  return (r==NULL);
 }
 
 void
@@ -505,6 +528,17 @@ Manager::receive_hashing_changed() {
         lt_log_print(torrent::LOG_TORRENT_ERROR, "Hashing failed: %s", e.what());
       }
     }
+  }
+}
+
+void
+Manager::reload_ip_filter() {
+  if( m_ipFilter ) {
+    push_log("Reloading IP filter");
+    m_ipFilter->reload();
+    std::ostringstream logMsg;
+    logMsg << "IP filter reloaded with " << m_ipFilter->size() << " ranges total, " << m_ipFilter->errors() << " were faulty or had duplicate start address.";
+    push_log( logMsg.str().c_str() );
   }
 }
 

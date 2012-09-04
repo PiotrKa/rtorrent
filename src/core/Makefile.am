@@ -28,6 +28,15 @@ libsub_core_a_SOURCES = \
 	view.cc \
 	view.h \
 	view_manager.cc \
-	view_manager.h
+	view_manager.h \
+	ip_address.cc \
+	ip_address.h \
+	ip_filter.cc \
+	ip_filter.h \
+	ip_range.cc \
+	ip_range.h \
+	printable.h \
+	regex_namespace.h \
+	ip_filter_statics.cc
 
 INCLUDES = -I$(srcdir) -I$(srcdir)/.. -I$(top_srcdir)

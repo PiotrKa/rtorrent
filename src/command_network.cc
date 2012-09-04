@@ -36,6 +36,11 @@
 
 #include "config.h"
 
+#include <string>
+#include <sstream>
+#include <list>
+#include <unistd.h>
+
 #include <functional>
 #include <cstdio>
 #include <unistd.h>
@@ -63,6 +68,9 @@
 #include "command_helpers.h"
 
 namespace tr1 { using namespace std::tr1; }
+
+#include <boost/algorithm/string/trim.hpp>
+#include "core/ip_filter.h"
 
 torrent::Object
 apply_encryption(const torrent::Object::list_type& args) {
@@ -230,6 +238,46 @@ apply_xmlrpc_dialect(const std::string& arg) {
   return torrent::Object();
 }
 
+torrent::Object
+apply_ip_filter(const torrent::Object::list_type& args) {
+  std::list<std::string> files;
+
+  for (torrent::Object::list_const_iterator itr = args.begin(), last = args.end(); itr != last; itr++) {
+    std::string file(itr->as_string());
+    boost::trim(file);
+    if (euidaccess(file.c_str(), R_OK))
+      throw torrent::input_error("IP filter file '" + file + "' doesn't exist or is not readable. Filter couldn't be loaded.");
+    files.push_back(file);
+  }
+
+  if (files.empty()) {
+    control->core()->push_log("IP filter file list is empty.");
+  }
+  else {
+    core::IpFilter* f = new core::IpFilter();
+    std::ostringstream logMsg;
+    int entries = 0;
+    logMsg << "Initializing IP filter with files: ";
+    for (std::list<std::string>::iterator itr = files.begin(); itr != files.end(); itr++) {
+      if (itr != files.begin())
+        logMsg << ", ";
+      logMsg << "'" << *itr << "'";
+      if (f->add_from_file(*itr) < 0)
+        throw torrent::input_error("IP filter failed to open file '" + *itr + "'.");
+      entries = f->size();
+    }
+    logMsg << ".";
+    control->core()->push_log(logMsg.str().c_str());
+    logMsg.str("");
+    logMsg << "IP filter loaded with ";
+    logMsg << f->size() << " ranges total, " << f->errors() << " were faulty or had duplicate start address.";
+    control->core()->push_log(logMsg.str().c_str());
+    control->core()->set_ip_filter(f);
+  }
+
+  return torrent::Object();
+}
+
 void
 initialize_command_network() {
   torrent::ConnectionManager* cm = torrent::connection_manager();
@@ -299,4 +347,7 @@ initialize_command_network() {
   CMD2_ANY_STRING  ("network.xmlrpc.dialect.set",    tr1::bind(&apply_xmlrpc_dialect, tr1::placeholders::_2));
   CMD2_ANY         ("network.xmlrpc.size_limit",     tr1::bind(&rpc::XmlRpc::size_limit));
   CMD2_ANY_VALUE_V ("network.xmlrpc.size_limit.set", tr1::bind(&rpc::XmlRpc::set_size_limit, tr1::placeholders::_2));
+
+  CMD2_ANY_VOID    ("reload_ip_filter", tr1::bind(&core::Manager::reload_ip_filter, control->core()));
+  CMD2_ANY_LIST    ("ip_filter",        tr1::bind(&apply_ip_filter, tr1::placeholders::_2));
 }

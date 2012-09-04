@@ -47,6 +47,8 @@
 #include "poll_manager.h"
 #include "range_map.h"
 
+#include "ip_filter.h"
+
 namespace torrent {
   class Bencode;
 }
@@ -118,6 +120,15 @@ public:
 
   void                handshake_log(const sockaddr* sa, int msg, int err, const torrent::HashString* hash);
 
+  uint32_t            filter_ip(const sockaddr* sa);
+
+  void                set_ip_filter( IpFilter* ipFilter ) {
+                        IpFilter* old = m_ipFilter;
+                        m_ipFilter = ipFilter;
+                        if( old ) delete old;
+                      }
+  void                reload_ip_filter(void);
+
   static const int create_start    = 0x1;
   static const int create_tied     = 0x2;
   static const int create_quiet    = 0x4;
@@ -154,6 +165,8 @@ private:
 
   torrent::log_buffer* m_log_important;
   torrent::log_buffer* m_log_complete;
+
+  IpFilter*            m_ipFilter;
 };
 
 // Meh, cleanup.
