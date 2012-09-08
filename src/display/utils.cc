@@ -135,9 +135,9 @@ print_download_title(char* first, char* last, core::Download* d) {
 char*
 print_download_info(char* first, char* last, core::Download* d) {
   if (!d->download()->info()->is_open())
-    first = print_buffer(first, last, "[CLOSED]  ");
+    first = print_buffer(first, last, "  [CLOSED]");
   else if (!d->download()->info()->is_active())
-    first = print_buffer(first, last, "[OPEN]    ");
+    first = print_buffer(first, last, "  [OPEN]  ");
   else
     first = print_buffer(first, last, "          ");
 
@@ -187,12 +187,12 @@ print_download_status(char* first, char* last, core::Download* d) {
   if (d->is_active())
     ;
   else if (rpc::call_command_value("d.hashing", rpc::make_target(d)) != 0)
-    first = print_buffer(first, last, "Hashing: ");
+    first = print_buffer(first, last, "  Hashing: ");
   else if (!d->is_active())
-    first = print_buffer(first, last, "Inactive: ");
+    first = print_buffer(first, last, "  Inactive: ");
 
   if (d->is_hash_checking()) {
-    first = print_buffer(first, last, "Checking hash [%2i%%]",
+    first = print_buffer(first, last, "  Checking hash [%2i%%]",
                          (d->download()->chunks_hashed() * 100) / d->download()->file_list()->size_chunks());
 
   } else if (d->tracker_list()->has_active_not_scrape()) {
@@ -202,7 +202,7 @@ print_download_status(char* first, char* last, core::Download* d) {
     char status[128];
 
     (*itr)->get_status(status, sizeof(status));
-    first = print_buffer(first, last, "Tracker[%i:%i]: Connecting to %s %s",
+    first = print_buffer(first, last, "  Tracker[%i:%i]: Connecting to %s %s",
                          (*itr)->group(), std::distance(d->tracker_list()->begin(), itr), (*itr)->url().c_str(), status);
 
   } else if (!d->message().empty()) {

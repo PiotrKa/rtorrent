@@ -115,12 +115,12 @@ Download::receive_tracker_msg(std::string msg) {
   if (msg.empty())
     m_message = "";
   else
-    m_message = "Tracker: [" + msg + "]";
+    m_message = "  Tracker: [" + msg + "]";
 }
 
 void
 Download::receive_storage_error(std::string msg) {
-  m_message = "Storage error: [" + msg + "]";
+  m_message = "  Storage error: [" + msg + "]";
 }
 
 float
