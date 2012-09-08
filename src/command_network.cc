@@ -350,4 +350,13 @@ initialize_command_network() {
 
   CMD2_ANY_VOID    ("reload_ip_filter", tr1::bind(&core::Manager::reload_ip_filter, control->core()));
   CMD2_ANY_LIST    ("ip_filter",        tr1::bind(&apply_ip_filter, tr1::placeholders::_2));
+
+  CMD2_ANY         ("done_fg_color",       tr1::bind(&ui::Root::get_done_fg_color, control->ui()));
+  CMD2_ANY_VALUE_V ("done_fg_color.set",   tr1::bind(&ui::Root::set_done_fg_color, control->ui(), tr1::placeholders::_2));
+  CMD2_ANY         ("done_bg_color",       tr1::bind(&ui::Root::get_done_bg_color, control->ui()));
+  CMD2_ANY_VALUE_V ("done_bg_color.set",   tr1::bind(&ui::Root::set_done_bg_color, control->ui(), tr1::placeholders::_2));
+  CMD2_ANY         ("active_fg_color",     tr1::bind(&ui::Root::get_active_fg_color, control->ui()));
+  CMD2_ANY_VALUE_V ("active_fg_color.set", tr1::bind(&ui::Root::set_active_fg_color, control->ui(), tr1::placeholders::_2));
+  CMD2_ANY         ("active_bg_color",     tr1::bind(&ui::Root::get_active_bg_color, control->ui()));
+  CMD2_ANY_VALUE_V ("active_bg_color.set", tr1::bind(&ui::Root::set_active_bg_color, control->ui(), tr1::placeholders::_2));
 }
