@@ -100,32 +100,35 @@ WindowDownloadList::redraw() {
         break;
 
     print_download_title(buffer, last, *range.first);
-    m_canvas->print(0, pos, "%c %s", range.first == m_view->focus() ? '*' : ' ', buffer);
+    m_canvas->print(0, pos, "%s", buffer);
     if ((*range.first)->is_done()) {
       if ((*range.first)->download()->info()->up_rate()->rate() != 0) {
-        m_canvas->set_attr(0, pos, m_canvas->width()-1, A_BOLD, 2);
+        m_canvas->set_attr(0, pos, m_canvas->width(), range.first == m_view->focus() ? A_REVERSE|A_BOLD : A_BOLD, 2);
       } else {
-        m_canvas->set_attr(0, pos, m_canvas->width()-1, A_NORMAL, 2);
+        m_canvas->set_attr(0, pos, m_canvas->width(), range.first == m_view->focus() ? A_REVERSE : A_NORMAL, 2);
       }
     } else if ((*range.first)->download()->info()->is_active()) {
       if ((*range.first)->download()->info()->down_rate()->rate() != 0) {
-        m_canvas->set_attr(0, pos, m_canvas->width()-1, A_BOLD, 1);
+        m_canvas->set_attr(0, pos, m_canvas->width(), range.first == m_view->focus() ? A_REVERSE|A_BOLD : A_BOLD, 1);
       } else {
-        m_canvas->set_attr(0, pos, m_canvas->width()-1, A_NORMAL, 1);
+        m_canvas->set_attr(0, pos, m_canvas->width(), range.first == m_view->focus() ? A_REVERSE : A_NORMAL, 1);
       }
     }
     pos++;
-
     if (pos >= m_canvas->height())
         break;
     
     print_download_info(buffer, last, *range.first);
-    m_canvas->print(0, pos++, "%c %s", range.first == m_view->focus() ? '*' : ' ', buffer);
+    m_canvas->print(0, pos, "%s", buffer);
+    m_canvas->set_attr(0, pos, m_canvas->width(), range.first == m_view->focus() ? A_REVERSE : A_NORMAL, 0);
+    pos++;
     if (pos >= m_canvas->height())
         break;
 
     print_download_status(buffer, last, *range.first);
-    m_canvas->print(0, pos++, "%c %s", range.first == m_view->focus() ? '*' : ' ', buffer);
+    m_canvas->print(0, pos, "%s", buffer);
+    m_canvas->set_attr(0, pos, m_canvas->width(), range.first == m_view->focus() ? A_REVERSE : A_NORMAL, 0);
+    pos++;
 
     ++range.first;
   }    
