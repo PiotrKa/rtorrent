@@ -45,6 +45,9 @@
 #include <torrent/peer/connection_list.h>
 #include <torrent/peer/peer.h>
 #include <torrent/peer/peer_info.h>
+#include <sstream>
+#include <GeoIP.h>
+#include <GeoIPCity.h>
 
 #include "core/manager.h"
 #include "display/utils.h"
@@ -52,6 +55,9 @@
 #include "globals.h"
 #include "control.h"
 #include "command_helpers.h"
+
+#define GEOIP_IP_NOT_FOUND "(IP address not found)"
+#define MK_NA(p) (p ? p : "N/A")
 
 torrent::Object
 retrieve_p_id(torrent::Peer* peer) {
@@ -75,6 +81,62 @@ retrieve_p_address(torrent::Peer* peer) {
 torrent::Object
 retrieve_p_port(torrent::Peer* peer) {
   return rak::socket_address::cast_from(peer->peer_info()->socket_address())->port();
+}
+
+torrent::Object
+retrieve_p_country(torrent::Peer* peer) {
+  GeoIP*      gi = control->core()->gi_country();
+  int         country_id;
+  std::string country_code;
+  std::string country_name;
+  std::string country_continent;
+
+  if (!gi)
+    return "(country db not available)";
+
+  country_id = GeoIP_id_by_ipnum(gi, ntohl(rak::socket_address::cast_from(peer->peer_info()->socket_address())->address().s_addr));
+  if (!country_id)
+    return GEOIP_IP_NOT_FOUND;
+  else {
+    country_code = MK_NA(GeoIP_code_by_id(country_id));
+    country_name = MK_NA(GeoIP_name_by_id(country_id));
+    country_continent = MK_NA(GeoIP_continent_by_id(country_id));
+    return country_continent + "; " + country_code + ", " + country_name;
+  }
+}
+
+torrent::Object
+retrieve_p_city(torrent::Peer* peer) {
+  GeoIP*             gi = control->core()->gi_city();
+  GeoIPRecord*       gir;
+  std::ostringstream s;
+
+  if (!gi)
+    return "(city db not available)";
+
+  gir = GeoIP_record_by_ipnum(gi, ntohl(rak::socket_address::cast_from(peer->peer_info()->socket_address())->address().s_addr));
+  if (!gir)
+    return GEOIP_IP_NOT_FOUND;
+  else {
+    s << MK_NA(gir->region) << ", " << MK_NA(gir->city)
+      << ", " << MK_NA(gir->postal_code)
+      << ", " << gir->latitude << ", " << gir->longitude
+      << ", " << gir->metro_code << ", " << gir->area_code;
+    GeoIPRecord_delete(gir);
+    return s.str();
+  }
+}
+
+torrent::Object
+retrieve_p_asnum(torrent::Peer* peer) {
+  GeoIP* gi = control->core()->gi_asnum();
+  const char *asnum_name;
+
+  if (!gi)
+    return "(ASNum db not available)";
+
+  asnum_name = GeoIP_name_by_ipnum(gi, ntohl(rak::socket_address::cast_from(peer->peer_info()->socket_address())->address().s_addr));
+  return asnum_name ? asnum_name : GEOIP_IP_NOT_FOUND;
 }
 
 torrent::Object
@@ -113,6 +175,10 @@ initialize_command_peer() {
 
   CMD2_PEER("p.address",           tr1::bind(&retrieve_p_address, tr1::placeholders::_1));
   CMD2_PEER("p.port",              tr1::bind(&retrieve_p_port, tr1::placeholders::_1));
+
+  CMD2_PEER("p.country",           tr1::bind(&retrieve_p_country, tr1::placeholders::_1));
+  CMD2_PEER("p.city",              tr1::bind(&retrieve_p_city, tr1::placeholders::_1));
+  CMD2_PEER("p.asnum",             tr1::bind(&retrieve_p_asnum, tr1::placeholders::_1));
 
   CMD2_PEER("p.completed_percent", tr1::bind(&retrieve_p_completed_percent, tr1::placeholders::_1));
 

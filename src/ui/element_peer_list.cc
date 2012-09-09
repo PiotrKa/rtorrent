@@ -110,6 +110,13 @@ ElementPeerList::create_info() {
 
   element->push_back("");
   element->push_column("Address:",   te_command("cat=$p.address=,:,$p.port="));
+
+  element->push_back("");
+  element->push_column("Country:",   te_command("p.country="));
+  element->push_column("City:",      te_command("p.city="));
+  element->push_column("AS Number:", te_command("p.asnum="));
+  element->push_back("");
+
   element->push_column("Id:",        te_command("p.id_html="));
   element->push_column("Client:",    te_command("p.client_version="));
   element->push_column("Options:",   te_command("p.options_str="));

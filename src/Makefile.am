@@ -52,4 +52,6 @@ rtorrent_LDADD = \
 rtorrent_SOURCES = \
 	main.cc
 
+rtorrent_LDFLAGS = -lGeoIP
+
 INCLUDES = -I$(srcdir) -I$(top_srcdir)

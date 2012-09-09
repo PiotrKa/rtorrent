@@ -39,6 +39,7 @@
 
 #include <list>
 #include <torrent/peer/peer.h>
+#include <GeoIP.h>
 
 #include "window.h"
 
@@ -63,6 +64,8 @@ private:
 
   PList*           m_list;
   PList::iterator* m_focus;
+
+  GeoIP*           gi;
 };
 
 }

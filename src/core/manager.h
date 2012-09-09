@@ -43,6 +43,8 @@
 #include <torrent/utils/log_buffer.h>
 #include <torrent/connection_manager.h>
 
+#include <GeoIP.h>
+
 #include "download_list.h"
 #include "poll_manager.h"
 #include "range_map.h"
@@ -89,6 +91,10 @@ public:
 
   torrent::log_buffer* log_important()                    { return m_log_important; }
   torrent::log_buffer* log_complete()                     { return m_log_complete; }
+
+  GeoIP*              gi_country()                        { return m_gi_country; }
+  GeoIP*              gi_city()                           { return m_gi_city; }
+  GeoIP*              gi_asnum()                          { return m_gi_asnum; }
 
   ThrottleMap&          throttles()                       { return m_throttles; }
   torrent::ThrottlePair get_throttle(const std::string& name);
@@ -152,6 +158,9 @@ private:
   void                receive_http_failed(std::string msg);
   void                receive_hashing_changed();
 
+  void                init_gi();
+  void                delete_gi();
+
   DownloadList*       m_downloadList;
   DownloadStore*      m_downloadStore;
   FileStatusCache*    m_fileStatusCache;
@@ -167,6 +176,10 @@ private:
   torrent::log_buffer* m_log_complete;
 
   IpFilter*            m_ipFilter;
+
+  GeoIP*              m_gi_country;
+  GeoIP*              m_gi_city;
+  GeoIP*              m_gi_asnum;
 };
 
 // Meh, cleanup.

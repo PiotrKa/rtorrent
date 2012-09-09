@@ -87,6 +87,7 @@ public:
   sa_family_t         family() const                          { return m_sockaddr.sa_family; }
   void                set_family()                            { m_sockaddr.sa_family = af_unspec; }
 
+  in_addr             address() const;
   uint16_t            port() const;
   void                set_port(uint16_t p);
 
@@ -265,6 +266,16 @@ socket_address::is_address_any() const {
     return sa_inet()->is_address_any();
   default:
     return true;
+  }
+}
+
+inline in_addr
+socket_address::address() const {
+  switch (family()) {
+  case af_inet:
+    return sa_inet()->address();
+  default:
+    throw std::logic_error("socket_address(...) received an unsupported protocol family.");
   }
 }
 

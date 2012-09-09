@@ -43,6 +43,7 @@
 #include <torrent/data/piece.h>
 #include <torrent/peer/client_list.h>
 #include <torrent/peer/peer_info.h>
+#include <GeoIP.h>
 
 #include "core/download.h"
 #include "rak/algorithm.h"
@@ -50,6 +51,8 @@
 #include "canvas.h"
 #include "utils.h"
 #include "window_peer_list.h"
+#include "control.h"
+#include "core/manager.h"
 
 namespace display {
 
@@ -57,7 +60,9 @@ WindowPeerList::WindowPeerList(core::Download* d, PList* l, PList::iterator* f) 
   Window(new Canvas, 0, 0, 0, extent_full, extent_full),
   m_download(d),
   m_list(l),
-  m_focus(f) {
+  m_focus(f),
+  gi(NULL) {
+    gi = control->core()->gi_country();
 }
 
 void
@@ -69,6 +74,7 @@ WindowPeerList::redraw() {
   int y = 0;
 
   m_canvas->print(x, y, "IP");     x += 16;
+  m_canvas->print(x, y, "CC");      x += 7;
   m_canvas->print(x, y, "UP");      x += 7;
   m_canvas->print(x, y, "DOWN");    x += 7;
   m_canvas->print(x, y, "PEER");    x += 7;
@@ -103,6 +109,12 @@ WindowPeerList::redraw() {
                     range.first == *m_focus ? '*' : ' ',
                     rak::socket_address::cast_from(p->address())->address_str().c_str());
     x += 18;
+
+    if (gi) {
+      const char *cc = GeoIP_country_code_by_ipnum(gi, ntohl(rak::socket_address::cast_from(p->address())->address().s_addr));
+      m_canvas->print(x, y, "%s", cc ? cc : "--");
+    }
+    x += 7;
 
     m_canvas->print(x, y, "%.1f", (double)p->up_rate()->rate() / 1024); x += 7;
     m_canvas->print(x, y, "%.1f", (double)p->down_rate()->rate() / 1024); x += 7;

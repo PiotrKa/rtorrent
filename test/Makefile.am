@@ -23,6 +23,6 @@ rtorrentTest_SOURCES = \
 	main.cc
 
 rtorrentTest_CXXFLAGS = $(CPPUNIT_CFLAGS)
-rtorrentTest_LDFLAGS = $(CPPUNIT_LIBS)  -ldl
+rtorrentTest_LDFLAGS = $(CPPUNIT_LIBS)  -ldl  -lGeoIP
 
 INCLUDES = -I$(srcdir) -I$(top_srcdir) -I$(top_srcdir)/src

@@ -86,7 +86,10 @@ Manager::Manager() :
   m_hashingView(NULL),
   m_log_important(torrent::log_open_log_buffer("important")),
   m_log_complete(torrent::log_open_log_buffer("complete")),
-  m_ipFilter(NULL)
+  m_ipFilter(NULL),
+  m_gi_country(NULL),
+  m_gi_city(NULL),
+  m_gi_asnum(NULL)
 {
   m_downloadStore   = new DownloadStore();
   m_downloadList    = new DownloadList();
@@ -155,6 +158,8 @@ Manager::initialize_second() {
   CurlStack::global_init();
 
   torrent::connection_manager()->set_filter(sigc::mem_fun(this, &Manager::filter_ip));
+
+  init_gi();
 }
 
 uint32_t
@@ -189,6 +194,8 @@ Manager::cleanup() {
 
   delete m_httpStack;
   CurlStack::global_cleanup();
+
+  delete_gi();
 
 }
 
@@ -540,6 +547,38 @@ Manager::reload_ip_filter() {
     logMsg << "IP filter reloaded with " << m_ipFilter->size() << " ranges total, " << m_ipFilter->errors() << " were faulty or had duplicate start address.";
     push_log( logMsg.str().c_str() );
   }
+}
+
+void Manager::init_gi(void) {
+  std::ostringstream msg;
+  msg << "Opening GeoIP databases: ";
+
+  if (GeoIP_db_avail(GEOIP_COUNTRY_EDITION)) {
+      m_gi_country = GeoIP_open_type(GEOIP_COUNTRY_EDITION, GEOIP_MMAP_CACHE | GEOIP_CHECK_CACHE);
+      GeoIP_set_charset(m_gi_country, GEOIP_CHARSET_UTF8);
+      msg << "Country ";
+  }
+
+  if (GeoIP_db_avail(GEOIP_CITY_EDITION_REV1)) {
+      m_gi_city = GeoIP_open_type(GEOIP_CITY_EDITION_REV1, GEOIP_MMAP_CACHE | GEOIP_CHECK_CACHE);
+      GeoIP_set_charset(m_gi_city, GEOIP_CHARSET_UTF8);
+      msg << "City ";
+  }
+
+  if (GeoIP_db_avail(GEOIP_ASNUM_EDITION)) {
+      m_gi_asnum = GeoIP_open_type(GEOIP_ASNUM_EDITION, GEOIP_MMAP_CACHE | GEOIP_CHECK_CACHE);
+      GeoIP_set_charset(m_gi_asnum, GEOIP_CHARSET_UTF8);
+      msg << "ASNum ";
+  }
+
+  msg << ".";
+  lt_log_print(torrent::LOG_NOTICE, msg.str().c_str());
+}
+
+void Manager::delete_gi(void) {
+  GeoIP_delete(m_gi_country);
+  GeoIP_delete(m_gi_city);
+  GeoIP_delete(m_gi_asnum);
 }
 
 }
