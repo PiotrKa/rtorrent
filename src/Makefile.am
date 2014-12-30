@@ -47,11 +47,10 @@ rtorrent_LDADD = \
 	input/libsub_input.a \
 	rpc/libsub_rpc.a \
 	utils/libsub_utils.a \
-	@PTHREAD_LIBS@
+	@PTHREAD_LIBS@ \
+	-lGeoIP
 
 rtorrent_SOURCES = \
 	main.cc
 
-rtorrent_LDFLAGS = -lGeoIP
-
-INCLUDES = -I$(srcdir) -I$(top_srcdir)
+AM_CPPFLAGS = -I$(srcdir) -I$(top_srcdir)

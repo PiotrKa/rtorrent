@@ -7,7 +7,8 @@ rtorrentTest_LDADD = \
 	../src/display/libsub_display.a \
 	../src/input/libsub_input.a \
 	../src/rpc/libsub_rpc.a \
-	../src/utils/libsub_utils.a
+	../src/utils/libsub_utils.a \
+	-lGeoIP
 
 rtorrentTest_SOURCES = \
 	rpc/command_test.cc \
@@ -23,6 +24,6 @@ rtorrentTest_SOURCES = \
 	main.cc
 
 rtorrentTest_CXXFLAGS = $(CPPUNIT_CFLAGS)
-rtorrentTest_LDFLAGS = $(CPPUNIT_LIBS)  -ldl  -lGeoIP
+rtorrentTest_LDFLAGS = $(CPPUNIT_LIBS)  -ldl
 
 INCLUDES = -I$(srcdir) -I$(top_srcdir) -I$(top_srcdir)/src
