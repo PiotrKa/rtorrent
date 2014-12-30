@@ -157,7 +157,7 @@ Manager::initialize_second() {
 
   CurlStack::global_init();
 
-  torrent::connection_manager()->set_filter(sigc::mem_fun(this, &Manager::filter_ip));
+  torrent::connection_manager()->set_filter(std::bind(&Manager::filter_ip, this, std::placeholders::_1));
 
   init_gi();
 }

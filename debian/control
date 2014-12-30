@@ -13,7 +13,6 @@ Build-Depends:
  libcurl4-openssl-dev,
  libncurses5-dev,
  libncursesw5-dev,
- libsigc++-2.0-dev,
  libtorrent-dev (>= 0.12.7-6),
  libxmlrpc-core-c3-dev
 Standards-Version: 3.9.2

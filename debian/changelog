@@ -1,3 +1,9 @@
+rtorrent (0.9.4-1+pepe) unstable; urgency=medium
+
+  * new upstream release
+
+ -- Piotr Kaczuba <p.kaczuba@trosti.pl>  Sun, 28 Dec 2014 23:30:14 +0100
+
 rtorrent (0.9.3-2+pepe) unstable; urgency=low
 
   * new merge from upstream
