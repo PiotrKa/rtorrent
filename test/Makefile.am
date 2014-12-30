@@ -1,4 +1,6 @@
 TESTS = rtorrentTest
+AUTOMAKE_OPTIONS = subdir-objects
+
 check_PROGRAMS = $(TESTS)
 rtorrentTest_LDADD = \
 	../src/libsub_root.a \
@@ -26,4 +28,4 @@ rtorrentTest_SOURCES = \
 rtorrentTest_CXXFLAGS = $(CPPUNIT_CFLAGS)
 rtorrentTest_LDFLAGS = $(CPPUNIT_LIBS)  -ldl
 
-INCLUDES = -I$(srcdir) -I$(top_srcdir) -I$(top_srcdir)/src
+AM_CPPFLAGS = -I$(srcdir) -I$(top_srcdir) -I$(top_srcdir)/src

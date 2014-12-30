@@ -39,7 +39,6 @@
 
 #include <deque>
 #include <string>
-#include <sigc++/functors/slot.h>
 
 #include "rak/priority_queue_default.h"
 
@@ -125,6 +124,8 @@ class CurlStack : std::deque<CurlGet*> {
   void operator = (const CurlStack&);
 
   void                receive_timeout();
+
+  bool                process_done_handle();
 
   void*               m_handle;
 

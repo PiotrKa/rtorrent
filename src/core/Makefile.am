@@ -39,4 +39,4 @@ libsub_core_a_SOURCES = \
 	regex_namespace.h \
 	ip_filter_statics.cc
 
-INCLUDES = -I$(srcdir) -I$(srcdir)/.. -I$(top_srcdir)
+AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/.. -I$(top_srcdir)
